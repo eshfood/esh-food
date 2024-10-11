@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Today's Menu</h1>
+    <div class="menu-container" id="menu"></div>
+
+    <script>
+        async function fetchMenu() {
+            try {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                
+                const url = `https://www.sodexo.fi/en/ruokalistat/output/daily_json/631587/${year}-${month}-${day}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const menuContainer = document.getElementById('menu');
+                const courses = data.courses;
+                
+                menuContainer.innerHTML = '';
+
+                for (const key in courses) {
+                    if (courses.hasOwnProperty(key)) {
+                        const course = courses[key];
+                        const mealElement = document.createElement('div');
+                        mealElement.className = 'menu-item';
+                        mealElement.innerHTML = `
+                            <strong>${course.title_en}</strong><br>
+                            <em>Category:</em> ${course.category}<br>
+                            <em>Diet Codes:</em> ${course.dietcodes}<br>
+                            <em>Allergens:</em> ${course.additionalDietInfo?.allergens || 'None'}<br>
+                        `;
+                        // ${course.recipes['0'].name ? `<strong>Dish:</strong> ${course.recipes['0'].name}` : ''}
+                        menuContainer.appendChild(mealElement);
+                    }
+                }
+            } catch (error) {
+                document.getElementById('menu').innerHTML = '<p>Failed to load the menu.</p>';
+                console.error('Error fetching menu:', error);
+            }
+        }
+
+        fetchMenu();
+    </script>
+</body>
+</html>
